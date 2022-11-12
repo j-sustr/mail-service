@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  server:
+    container_name: server
+    build:
+      context: ./
+      target: development-build-stage
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    restart: "unless-stopped"
+    networks:
+      - backend
+    depends_on:
+      - pg
+
+  postgres_db:
+    container_name: postgres_db
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=s3cret
+      - POSTGRES_DB=db1
+    ports:
+      - "5432:5432"
+    restart: always
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local

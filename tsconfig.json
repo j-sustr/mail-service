@@ -1,15 +1,30 @@
 {
-   "compilerOptions": {
-      "lib": [
-         "es5",
-         "es6"
-      ],
-      "target": "es5",
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "outDir": "./build",
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
-      "sourceMap": true
-   }
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "es2017",
+    "lib": ["es2017", "esnext.asynciterable"],
+    "typeRoots": ["node_modules/@types"],
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "Node",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "pretty": true,
+    "sourceMap": true,
+    "declaration": true,
+
+    "outDir": "./build",
+    "noEmit": false,
+
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    "importHelpers": true,
+    // "baseUrl": "src"
+  },
+  "include": ["src/**/*.ts", "src/**/*.json", ".env"],
+  "exclude": ["node_modules"]
 }
