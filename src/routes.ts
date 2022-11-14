@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
-import CreateConnection from "./controller/connection/createConnection";
+import CreateConnection from "./controller/connection/CreateConnection";
+import ListConnections from "./controller/connection/ListConnections";
 
 type AppRoute = {
   path: string;
@@ -12,6 +13,11 @@ export const AppRoutes: Array<AppRoute> = [
     path: "/connection",
     method: "post",
     handlers: CreateConnection,
+  },
+  {
+    path: "/connection/list",
+    method: "get",
+    handlers: ListConnections,
   },
   {
     path: "/mail",

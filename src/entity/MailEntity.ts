@@ -1,7 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Mail } from "../types/mailTypes";
 
 @Entity()
-export class Mail {
+export class MailEntity implements Mail {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -24,5 +25,5 @@ export class Mail {
   attachment?: string;
 
   @Column({ type: "timestamptz", nullable: true })
-  sendTime: Date | null = null;
+  sendTime?: Date;
 }

@@ -1,12 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-
-export enum ConnectionType {
-  IMAP = "IMAP",
-  SMTP = "SMTP",
-}
+import { ConnectionType, SmtpConnectionOptions } from "../types/connectionTypes";
 
 @Entity()
-export class Connection {
+export class ConnectionEntity implements SmtpConnectionOptions {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -21,7 +17,10 @@ export class Connection {
   host!: string;
 
   @Column()
-  port!: string;
+  port!: number;
+
+  @Column()
+  secure!: boolean;
 
   @Column()
   username!: string;

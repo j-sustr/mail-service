@@ -1,6 +1,6 @@
 import { DataSourceOptions } from "typeorm";
-import { Mail } from "../entity/Mail";
-import { Connection } from "../entity/Connection";
+import { MailEntity } from "../entity/MailEntity";
+import { ConnectionEntity } from "../entity/ConnectionEntity";
 
 export const dataSourceOptions: DataSourceOptions = {
   type: "postgres",
@@ -11,7 +11,7 @@ export const dataSourceOptions: DataSourceOptions = {
   database: "db1",
   synchronize: true,
   logging: true,
-  entities: [Connection, Mail],
+  entities: [ConnectionEntity, MailEntity],
   migrations: [],
   subscribers: [],
 };

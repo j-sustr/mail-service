@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
+import { StatusCodes } from "http-status-codes";
 import * as Joi from "joi";
-import { ResponseStatus } from "../core/api-types";
 import { getLogger } from "../service-providers";
 
 export enum ValidationSource {
@@ -26,7 +26,7 @@ export function dtoInValidator(
       // const message = details.map((i) => i.message.replace(/['"]+/g, "")).join(",");
       logger.error(error);
 
-      return res.status(ResponseStatus.BAD_REQUEST).json({ error });
+      return res.status(StatusCodes.BAD_REQUEST).json({ error });
     } catch (error) {
       next(error);
     }

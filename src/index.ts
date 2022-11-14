@@ -1,6 +1,7 @@
 import express from "express";
 import { getAppDataSource } from "./service-providers";
 import { AppRoutes } from "./routes";
+import { authorization } from "./middleware/authorization";
 
 const PORT = 8080;
 
@@ -23,7 +24,7 @@ getAppDataSource()
     app.use(express.json());
 
     AppRoutes.forEach((route) => {
-      app[route.method](route.path, ...route.handlers);
+      app[route.method](route.path, authorization(), ...route.handlers);
     });
 
     app.listen(PORT);
