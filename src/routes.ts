@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import CreateConnection from "./controller/connection/CreateConnection";
 import ListConnections from "./controller/connection/ListConnections";
+import SendMail from "./controller/mail/SendMail";
 
 type AppRoute = {
   path: string;
@@ -22,7 +23,7 @@ export const AppRoutes: Array<AppRoute> = [
   {
     path: "/mail",
     method: "post",
-    handlers: [],
+    handlers: SendMail,
   },
   {
     path: "/mail/list",

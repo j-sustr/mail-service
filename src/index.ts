@@ -1,5 +1,5 @@
 import express from "express";
-import { getAppDataSource } from "./service-providers";
+import { getAppDataSource } from "./serviceProvider";
 import { AppRoutes } from "./routes";
 import { authorization } from "./middleware/authorization";
 

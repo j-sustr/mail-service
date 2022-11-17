@@ -5,13 +5,13 @@ export interface Logger {
 }
 
 export class ConsoleLogger implements Logger {
-  info(message: any) {
-    console.info(message);
+  info(message: any, ...optionalParams: any[]) {
+    console.info(message, ...optionalParams);
   }
-  warn(message: any) {
-    console.warn(message);
+  warn(message: any, ...optionalParams: any[]) {
+    console.warn(message, ...optionalParams);
   }
-  error(message: any) {
-    console.error(message);
+  error(message: any, ...optionalParams: any[]) {
+    console.error(message, ...optionalParams);
   }
 }

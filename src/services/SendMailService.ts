@@ -1,6 +1,6 @@
 import { createTransport, createTestAccount } from "nodemailer";
-import { SmtpConnectionOptions } from "../types/connectionTypes";
-import { Mail } from "../types/mailTypes";
+import { SmtpConnectionOptions } from "../models/connection";
+import { Mail } from "../models/mail";
 
 export interface SendMailService {
   testConnection(options: SmtpConnectionOptions): Promise<boolean>;
@@ -22,7 +22,7 @@ export class NodemailerSendMailService implements SendMailService {
 
   async send(connectionOptions: SmtpConnectionOptions, mail: Mail): Promise<void> {
     const transporter = _createTransporter(connectionOptions);
-    const { from, to, subject, text, html } = mail;
+    const { from, to, subject, text, html, attachments } = mail;
 
     await transporter.sendMail({
       from,
@@ -30,6 +30,7 @@ export class NodemailerSendMailService implements SendMailService {
       subject,
       text,
       html,
+      attachments,
     });
   }
 }

@@ -1,22 +1,25 @@
 import { Request, RequestHandler, Response } from "express";
-import { ConnectionEntity } from "../../entity/ConnectionEntity";
-import { getConnectionRepository, getGetMailService, getLogger, getSendMailService } from "../../service-providers";
+import { getConnectionRepository, getGetMailService, getLogger, getSendMailService } from "../../serviceProvider";
 import * as Joi from "joi";
 import { dtoInValidator } from "../../middleware/dtoInValidator";
 import { StatusCodes } from "http-status-codes";
-import { ConnectionOptions, ConnectionType, SmtpConnectionOptions } from "../../types/connectionTypes";
+import * as ErrorResponse from "../../error/ErrorResponse";
+import { ConnectionOptions, ConnectionType } from "../../models/connection";
 
 const dtoInSchema = Joi.object({
   type: Joi.string().valid(ConnectionType.IMAP, ConnectionType.SMTP).required(),
   host: Joi.string().hostname().required(),
   port: Joi.number().port().required(),
+  secure: Joi.boolean().required(),
   username: Joi.string().required(),
   password: Joi.string().required(),
 });
 
-export const CreateConnection: Array<RequestHandler> = [dtoInValidator(dtoInSchema), createConnection];
+const CreateConnection: Array<RequestHandler> = [dtoInValidator(dtoInSchema), handleCreateConnection];
 
-async function createConnection(request: Request, response: Response) {
+export default CreateConnection;
+
+async function handleCreateConnection(request: Request, response: Response) {
   const repo = getConnectionRepository();
   const logger = getLogger();
 
@@ -27,11 +30,11 @@ async function createConnection(request: Request, response: Response) {
   const connectionOk = await testConnection(dtoIn);
 
   if (connectionOk) {
-    const newConnection = await repo.insert(dtoIn);
+    const result = await repo.insert(dtoIn);
 
-    response.sendStatus(StatusCodes.OK);
+    response.status(StatusCodes.OK).send(result.identifiers[0]);
   } else {
-    response.sendStatus(StatusCodes.BAD_REQUEST);
+    ErrorResponse.sendConenctionNotOk(response);
   }
 }
 

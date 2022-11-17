@@ -1,5 +1,5 @@
-import { ImapConnectionOptions } from "../types/connectionTypes";
-import { Mail } from "../types/mailTypes";
+import { ImapConnectionOptions } from "../models/connection";
+import { Mail } from "../models/mail";
 
 export interface GetMailService {
   testConnection(options: ImapConnectionOptions): Promise<boolean>;
