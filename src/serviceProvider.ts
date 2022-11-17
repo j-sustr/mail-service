@@ -5,7 +5,8 @@ import { MailEntity } from "./models/mail";
 import { NodemailerSendMailService, SendMailService } from "./services/SendMailService";
 import { GetMailService } from "./services/GetMailService";
 import { ScheduledSendMailService } from "./services/ScheduledSendMailService";
-import { ConsoleLogger, Logger } from "./services/logger";
+import { ConsoleLogger, Logger } from "./services/Logger";
+import { CurrentTimeService } from "./services/CurrentTimeService";
 
 const logger = new ConsoleLogger();
 const currentTimeService = new CurrentTimeService();
@@ -19,7 +20,8 @@ const scheduledSendMailService = new ScheduledSendMailService(
   mailRepository,
   connectionRepository,
   sendMailService,
-  currentTimeService
+  currentTimeService,
+  logger
 );
 
 export function getLogger(): Logger {

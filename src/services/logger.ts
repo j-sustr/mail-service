@@ -1,7 +1,7 @@
 export interface Logger {
-  info(message: any): void;
-  warn(message: any): void;
-  error(message: any): void;
+  info(message: any, ...optionalParams: any[]): void;
+  warn(message: any, ...optionalParams: any[]): void;
+  error(message: any, ...optionalParams: any[]): void;
 }
 
 export class ConsoleLogger implements Logger {

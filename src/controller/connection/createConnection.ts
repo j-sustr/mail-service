@@ -1,10 +1,12 @@
 import { Request, RequestHandler, Response } from "express";
-import { getConnectionRepository, getGetMailService, getLogger, getSendMailService } from "../../serviceProvider";
+import { getGetMailService, getSendMailService } from "../../serviceProvider";
 import * as Joi from "joi";
 import { dtoInValidator } from "../../middleware/dtoInValidator";
 import { StatusCodes } from "http-status-codes";
 import * as ErrorResponse from "../../error/ErrorResponse";
-import { ConnectionOptions, ConnectionType } from "../../models/connection";
+import { ConnectionEntity, ConnectionOptions, ConnectionType } from "../../models/connection";
+import { Repository } from "typeorm";
+import { Logger } from "../../services/Logger";
 
 const dtoInSchema = Joi.object({
   type: Joi.string().valid(ConnectionType.IMAP, ConnectionType.SMTP).required(),
@@ -15,34 +17,36 @@ const dtoInSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-const CreateConnection: Array<RequestHandler> = [dtoInValidator(dtoInSchema), handleCreateConnection];
+export default class CreateConnection {
+  constructor(private _repo: Repository<ConnectionEntity>, private _logger: Logger) {}
 
-export default CreateConnection;
-
-async function handleCreateConnection(request: Request, response: Response) {
-  const repo = getConnectionRepository();
-  const logger = getLogger();
-
-  const dtoIn = request.body;
-
-  logger.info("Creating connection");
-
-  const connectionOk = await testConnection(dtoIn);
-
-  if (connectionOk) {
-    const result = await repo.insert(dtoIn);
-
-    response.status(StatusCodes.OK).send(result.identifiers[0]);
-  } else {
-    ErrorResponse.sendConenctionNotOk(response);
+  getHandlers(): Array<RequestHandler> {
+    return [dtoInValidator(dtoInSchema), this._handleCreateConnection.bind(this)];
   }
-}
 
-async function testConnection(options: ConnectionOptions) {
-  if (options.type === ConnectionType.SMTP) {
-    return await getSendMailService().testConnection(options);
-  } else if (options.type === ConnectionType.IMAP) {
-    return await getGetMailService().testConnection(options);
+  private async _handleCreateConnection(request: Request, response: Response) {
+    const dtoIn = request.body;
+
+    const connectionOk = await this._testConnection(dtoIn);
+
+    if (connectionOk) {
+      const result = await this._repo.insert(dtoIn);
+
+      const id = result.identifiers[0];
+      this._logger.info(`Created connection '${id}'`);
+
+      response.status(StatusCodes.OK).send({ id });
+    } else {
+      ErrorResponse.sendConenctionNotOk(response);
+    }
   }
-  return false;
+
+  private async _testConnection(options: ConnectionOptions) {
+    if (options.type === ConnectionType.SMTP) {
+      return await getSendMailService().testConnection(options);
+    } else if (options.type === ConnectionType.IMAP) {
+      return await getGetMailService().testConnection(options);
+    }
+    return false;
+  }
 }

@@ -2,6 +2,13 @@ import { RequestHandler } from "express";
 import CreateConnection from "./controller/connection/CreateConnection";
 import ListConnections from "./controller/connection/ListConnections";
 import SendMail from "./controller/mail/SendMail";
+import {
+  getConnectionRepository,
+  getLogger,
+  getMailRepository,
+  getScheduledSendMailService,
+  getSendMailService,
+} from "./serviceProvider";
 
 type AppRoute = {
   path: string;
@@ -9,21 +16,30 @@ type AppRoute = {
   handlers: Array<RequestHandler>;
 };
 
+const createConnectionUseCase = new CreateConnection(getConnectionRepository(), getLogger());
+const listConnectionsUseCase = new ListConnections(getConnectionRepository(), getLogger());
+const sendMailUseCase = new SendMail(
+  getMailRepository(),
+  getConnectionRepository(),
+  getSendMailService(),
+  getScheduledSendMailService()
+);
+
 export const AppRoutes: Array<AppRoute> = [
   {
     path: "/connection",
     method: "post",
-    handlers: CreateConnection,
+    handlers: createConnectionUseCase.getHandlers(),
   },
   {
     path: "/connection/list",
     method: "get",
-    handlers: ListConnections,
+    handlers: listConnectionsUseCase.getHandlers(),
   },
   {
     path: "/mail",
     method: "post",
-    handlers: SendMail,
+    handlers: sendMailUseCase.getHandlers(),
   },
   {
     path: "/mail/list",

@@ -5,7 +5,7 @@ import { AttachmentEntity } from "../models/attachment";
 
 export const dataSourceOptions: DataSourceOptions = {
   type: "postgres",
-  host: "localhost",
+  host: "postgres_db",
   port: 5432,
   username: "testuser",
   password: "s3cret",

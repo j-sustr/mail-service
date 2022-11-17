@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Attachment, AttachmentEntity } from "./attachment";
 
 export interface Mail {
+  readonly id: number;
   readonly connectionId: number;
   readonly from: string;
   readonly to: string;
@@ -29,15 +30,15 @@ export class MailEntity implements Mail {
   @Column()
   subject!: string;
 
-  @Column()
+  @Column({ nullable: true })
   text?: string;
 
-  @Column()
+  @Column({ nullable: true })
   html?: string;
 
   @OneToMany(() => AttachmentEntity, (attachment) => attachment.mail)
   attachments?: AttachmentEntity[];
 
-  @Column({ type: "timestamptz", nullable: true })
-  sendTime?: Date;
+  @Column({ type: "timestamptz" })
+  sendTime!: Date;
 }

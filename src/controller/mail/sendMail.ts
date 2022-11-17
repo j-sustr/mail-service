@@ -1,14 +1,15 @@
 import { Request, RequestHandler, Response } from "express";
 import Joi from "joi";
 import { dtoInValidator } from "../../middleware/dtoInValidator";
-import { getConnectionRepository, getMailRepository, getSendMailService } from "../../serviceProvider";
 import { ConnectionEntity } from "../../models/connection";
 import * as ErrorResponse from "../../error/ErrorResponse";
 import { StatusCodes } from "http-status-codes";
 import { formWithAttachmentsHandler } from "../../middleware/formWithAttachmentsHandler";
-import multer from "multer";
-import { Mail } from "../../models/mail";
+import { Mail, MailEntity } from "../../models/mail";
 import { Attachment } from "../../models/attachment";
+import { SendMailService } from "../../services/SendMailService";
+import { Repository } from "typeorm";
+import { ScheduledSendMailService } from "../../services/ScheduledSendMailService";
 
 const dtoInSchema = Joi.object({
   connectionId: Joi.number().required(),
@@ -19,29 +20,45 @@ const dtoInSchema = Joi.object({
   sendTime: Joi.string().isoDate(),
 });
 
-const SendMail: Array<RequestHandler> = [formWithAttachmentsHandler(), dtoInValidator(dtoInSchema), handleSendMail];
+export default class SendMail {
+  constructor(
+    private _mailRepo: Repository<MailEntity>,
+    private _connectionRepo: Repository<ConnectionEntity>,
+    private _sendMailService: SendMailService,
+    private _scheduledSendMailService: ScheduledSendMailService
+  ) {}
 
-export default SendMail;
+  getHandlers(): Array<RequestHandler> {
+    return [formWithAttachmentsHandler(), dtoInValidator(dtoInSchema), this._handleSendMail.bind(this)];
+  }
 
-async function handleSendMail(request: Request, response: Response) {
-  const mailRepo = getMailRepository();
-  const sendMailService = getSendMailService();
+  private async _handleSendMail(request: Request, response: Response) {
+    const mail = createMail(request);
 
-  const mail = createMail(request);
+    if (isScheduledToBeSendInFuture(mail)) {
+      await this._handleScheduledSend(mail, response);
+    } else {
+      await this._handleImmediateSend(mail, response);
+    }
+  }
 
-  if (isScheduledToBeSendInFuture(mail)) {
-    // save to DB to be send in future
-    const result = await mailRepo.insert(request.body);
-  } else {
-    // send right away
-    const connection = await getConnectionById(mail.connectionId);
+  private async _handleScheduledSend(mail: Mail, response: Response<any, Record<string, any>>) {
+    const result = await this._mailRepo.insert(mail);
+
+    this._scheduledSendMailService.restart();
+
+    response.sendStatus(StatusCodes.OK);
+  }
+
+  private async _handleImmediateSend(mail: Mail, response: Response<any, Record<string, any>>) {
+    const connection = await this._getConnectionById(mail.connectionId);
     if (!connection) {
       ErrorResponse.sendConnectionNotFound(response);
       return;
     }
 
     try {
-      await sendMailService.send(connection, mail);
+      await this._sendMailService.send(connection, mail);
     } catch (error) {
       ErrorResponse.sendMailSendingFailed(response);
       return;
@@ -49,16 +66,12 @@ async function handleSendMail(request: Request, response: Response) {
 
     response.sendStatus(StatusCodes.OK);
   }
-}
 
-async function getConnectionById(id: number): Promise<ConnectionEntity | null> {
-  const connectionRepo = getConnectionRepository();
-  const connection = await connectionRepo.findOne({
-    where: {
+  private async _getConnectionById(id: number): Promise<ConnectionEntity | null> {
+    return await this._connectionRepo.findOneBy({
       id,
-    },
-  });
-  return connection;
+    });
+  }
 }
 
 function createMail({ body, files }: { body: Record<string, unknown>; files?: unknown }): Mail {

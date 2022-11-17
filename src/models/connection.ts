@@ -42,6 +42,7 @@ export class ConnectionEntity implements SmtpConnectionOptions {
   @Column()
   username!: string;
 
+  // TODO: encrypt
   @Column()
   password!: string;
 }

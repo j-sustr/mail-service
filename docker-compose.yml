@@ -5,7 +5,6 @@ services:
     container_name: server
     build:
       context: ./
-      target: development-build-stage
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
@@ -16,7 +15,7 @@ services:
     networks:
       - backend
     depends_on:
-      - pg
+      - postgres_db
 
   postgres_db:
     container_name: postgres_db

@@ -1,96 +1,103 @@
-import { LessThanOrEqual, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { ConnectionEntity } from "../models/connection";
 import { Mail, MailEntity } from "../models/mail";
-import { sleep } from "../utils/utils";
+import CancellationTokenSource from "../utils/CancellationTokenSource";
+import { exponentialBackoff, sleep } from "../utils/utils";
+import { CurrentTimeService } from "./CurrentTimeService";
+import { Logger } from "./Logger";
 import { SendMailService } from "./SendMailService";
 
-const MAX_NEXT_RANGE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
-const BATCH_PROXIMITY_MS = 2000; // 2 seconds
-
-interface ScheduledMail {
-  mailId: number;
-  sendTime: Date;
-}
-
 export class ScheduledSendMailService {
-  private mailQueue: ScheduledMail[] = [];
-  private isRunning = false;
+  private _isRunning = false;
+  private _cancellationTokenSource?: CancellationTokenSource;
 
   constructor(
     private mailRepo: Repository<MailEntity>,
     private connectionRepo: Repository<ConnectionEntity>,
     private sendMailService: SendMailService,
-    private currentTimeService: CurrentTimeService
+    private currentTimeService: CurrentTimeService,
+    private logger: Logger
   ) {}
 
-  start() {
-    if (this.isRunning) {
-      return;
-    }
+  restart() {
+    this.stop();
 
-    this._run();
+    this._isRunning = true;
+    this._cancellationTokenSource = new CancellationTokenSource();
+
+    this._run()
+      .catch((err) => {
+        this.logger.error("ScheduledSendMailService._run: ", err);
+      })
+      .finally(() => {
+        this._isRunning = false;
+      });
   }
 
   stop() {
-    if (!this.isRunning) {
+    if (!this._isRunning) {
       return;
     }
 
-    // TODO: implement cancellation
+    this._cancellationTokenSource?.cancel();
   }
 
   private async _run() {
-    for await (const scheduledMail of this._iterateMailQueue()) {
-      // TODO: batch sending of emails closer than 2s
-      const mail = this.getMailById(scheduledMail.mailId);
+    for await (const mail of this._scheduledMails()) {
+      const connection = await this.connectionRepo.findOneBy({
+        id: mail?.connectionId,
+      });
 
-      const connection = this.connectionRepo.
-      await this.sendMailService.send(mail);
+      if (!connection) {
+        this.logger.error(`A connection for the scheduled mail '${mail.id}' not found. Deleting the mail.`);
+        await this.mailRepo.delete(mail.id);
+        continue;
+      }
 
-      // remove email from DB after successful sending
-      await this.mailRepo.delete(scheduledMail.mailId);
+      this.logger.info("Sending scheduled mail", mail);
 
-      await this._updateMailQueue();
+      for await (const i of exponentialBackoff()) {
+        try {
+          await this.sendMailService.send(connection, mail);
+          break;
+        } catch (error) {
+          this.logger.info(`Scheduled sending of mail '${mail.id}' failed.`);
+        }
+      }
+
+      // remove mail from DB after it has been successfully sent
+      await this.mailRepo.delete(mail.id);
     }
   }
 
-  private async *_iterateMailQueue(): AsyncGenerator<ScheduledMail> {
-    while (this.mailQueue.length !== 0);
-    {
-      const mail = this.mailQueue.shift()!;
+  private async *_scheduledMails(): AsyncGenerator<Mail> {
+    let mail: Mail | null = null;
+    do {
+      mail = await this._getNextMailToSend();
 
-      const delayMs = Math.max(0, mail?.sendTime.getTime() ?? 0 - this.getTimeNow());
-      await sleep(delayMs);
+      if (!mail) {
+        continue;
+      } else {
+        const delayMs = Math.max(0, (mail.sendTime?.getTime() ?? 0) - this.getTimeNow());
 
-      yield mail;
-    }
+        await sleep(delayMs, this._cancellationTokenSource!.token);
+
+        yield mail;
+      }
+    } while (mail);
   }
 
-  private async _updateMailQueue() {
-    if (this.mailQueue.length < 10) {
-      await this._getNextMailsToSend();
-    }
-  }
-
-  private async _getNextMailsToSend(): Promise<Mail[]> {
-    const timeNow = this.getTimeNow();
-    const maxTime = new Date(timeNow + MAX_NEXT_RANGE_DURATION_MS);
-
-    return await this.mailRepo.find({
-      where: {
-        sendTime: LessThanOrEqual(maxTime),
-      },
+  private async _getNextMailToSend(): Promise<Mail | null> {
+    const result = await this.mailRepo.find({
       order: {
         sendTime: "ASC",
       },
+      take: 1,
     });
+    return result[0];
   }
 
   private getTimeNow() {
     return this.currentTimeService.getTime();
   }
-}
-
-function areCloserThanOrEqual(t1: number, t2: number, threshold: number) {
-  return Math.abs(t1 - t2) <= threshold;
 }

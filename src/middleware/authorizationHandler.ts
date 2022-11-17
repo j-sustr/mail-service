@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-export function authorization() {
+export function authorizationHandler() {
   return (req: Request, res: Response, next: NextFunction) => {
     if (hasValidToken(req)) {
       next();
