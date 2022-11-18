@@ -1,14 +1,19 @@
-# Awesome Project Build with TypeORM
+# Mail Service
 
-Steps to run this project:
+Steps to run this project via Docker:
 
-1. Run `npm i` command
-2. Setup database settings inside `data-source.ts` file
-3. Run `npm start` command
+1. Run `docker-compose up` command
+
+Insomnia workspace
+[file](.insomnia\insomnia-workspace.json)
 
 # Features
 
+- ✅ Creating of SMTP connections
+- ✅ Immediate mail sending
 - ✅ Scheduled mail sending
+
+- ❌ Listing emails via IMAP
 
 ## TODO:
 
@@ -16,10 +21,31 @@ Steps to run this project:
 - [] Optimize for bigger attachments
 - [] Connection password encryption
 
-# Use Insomnia workspace
+# API
 
+## Sending email
+
+1. Create SMTP connection by sending POST request to `localhost:8080/connection` with json body like this
+
+```json
+{
+  "type": "SMTP",
+  "host": "smtp.seznam.cz",
+  "port": 465,
+  "secure": true,
+  "username": "xyz@seznam.cz",
+  "password": "123"
+}
 ```
 
+
+2. Create SMTP connection by sending POST request to `localhost:8080/mail` with multipart payload like this
+
 ```
-
-
+connectionId = 3
+from = examplesender@seznam.cz
+to = examplerecipient@gmail.com
+subject = Greeting
+text = ...
+attachment = <file>
+```
