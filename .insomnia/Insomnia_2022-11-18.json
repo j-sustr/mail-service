@@ -1,0 +1,223 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2022-11-18T10:20:19.776Z",
+  "__export_source": "insomnia.desktop.app:v2022.6.0",
+  "resources": [
+    {
+      "_id": "req_3430682723274c66b9804e2e2ad71c36",
+      "parentId": "fld_f65509855e3143288b7535be5b3a6aa1",
+      "modified": 1668766762767,
+      "created": 1668668872213,
+      "url": "localhost:8080/mail",
+      "name": "Send Mail",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "id": "pair_b491c0a825ea48179b10c12143277212",
+            "name": "connectionId",
+            "value": "7",
+            "description": "",
+            "type": "text",
+            "multiline": false
+          },
+          {
+            "id": "pair_c7e0cc6085c5427392751d5112dcfeed",
+            "name": "from",
+            "value": "dev124@seznam.cz",
+            "description": ""
+          },
+          {
+            "id": "pair_ce2c52e03a4e4003a39421eb581deb8e",
+            "name": "to",
+            "value": "jan.sustr11@gmail.com",
+            "description": ""
+          },
+          {
+            "id": "pair_6052d868950b429885c72cc83845ae1f",
+            "name": "subject",
+            "value": "Scheduled message",
+            "description": ""
+          },
+          {
+            "id": "pair_a4449b613fc34a0fbcb9bcc2a03918e6",
+            "name": "text",
+            "value": "hello",
+            "description": ""
+          },
+          {
+            "id": "pair_76e276e49bee4bdcad8e3d792eb60e19",
+            "name": "attachment",
+            "value": "",
+            "description": "",
+            "type": "file",
+            "fileName": "C:\\Users\\User\\Downloads\\Test2.js"
+          },
+          {
+            "id": "pair_e56abdc14a564e27ad2389cc53b3313f",
+            "name": "sendTime",
+            "value": "2022-11-18T08:30:00.000Z",
+            "description": "",
+            "disabled": true
+          }
+        ]
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "multipart/form-data",
+          "id": "pair_d27072879ec8417aa5ffb00ec28cf030"
+        },
+        {
+          "id": "pair_8719ebac249540088421e9fed7e9ad1d",
+          "name": "",
+          "value": "",
+          "description": ""
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1668668896400.25,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_f65509855e3143288b7535be5b3a6aa1",
+      "parentId": "wrk_b1d9a8c184a54cbeac8ac279c4218053",
+      "modified": 1668668901612,
+      "created": 1668668901612,
+      "name": "Mail",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1668668901612,
+      "_type": "request_group"
+    },
+    {
+      "_id": "wrk_b1d9a8c184a54cbeac8ac279c4218053",
+      "parentId": null,
+      "modified": 1668345272477,
+      "created": 1668345205657,
+      "name": "Mail Service",
+      "description": "",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "req_ab87a343e64a4ec2a9c4122ec2481e41",
+      "parentId": "fld_3a999e2c362e41f9a5395be26176d7dc",
+      "modified": 1668766765580,
+      "created": 1668345281453,
+      "url": "localhost:8080/connection",
+      "name": "Create Connection",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"type\": \"SMTP\",\n\t\"host\": \"smtp.seznam.cz\",\n\t\"port\": 465,\n\t\"secure\": true,\n\t\"username\": \"dev124@seznam.cz\",\n\t\"password\": \"\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json",
+          "id": "pair_d27072879ec8417aa5ffb00ec28cf030"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1668345281453,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_3a999e2c362e41f9a5395be26176d7dc",
+      "parentId": "wrk_b1d9a8c184a54cbeac8ac279c4218053",
+      "modified": 1668668880765,
+      "created": 1668668880765,
+      "name": "Connection",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1668668880765,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_c299a419f0bd4939b42a865e7e3a7c7e",
+      "parentId": "fld_3a999e2c362e41f9a5395be26176d7dc",
+      "modified": 1668766765924,
+      "created": 1668456085209,
+      "url": "localhost:8080/connection/list",
+      "name": "List Connections",
+      "description": "",
+      "method": "GET",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n\t\"type\": \"SMTP\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1668345281403,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "env_4c0297f03abf4cf03cb1de59f9c37ba7461adc92",
+      "parentId": "wrk_b1d9a8c184a54cbeac8ac279c4218053",
+      "modified": 1668345205664,
+      "created": 1668345205664,
+      "name": "Base Environment",
+      "data": {},
+      "dataPropertyOrder": null,
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1668345205664,
+      "_type": "environment"
+    },
+    {
+      "_id": "jar_4c0297f03abf4cf03cb1de59f9c37ba7461adc92",
+      "parentId": "wrk_b1d9a8c184a54cbeac8ac279c4218053",
+      "modified": 1668345205667,
+      "created": 1668345205667,
+      "name": "Default Jar",
+      "cookies": [],
+      "_type": "cookie_jar"
+    },
+    {
+      "_id": "spc_2439c4072f1b40d295ab6e387d45d27e",
+      "parentId": "wrk_b1d9a8c184a54cbeac8ac279c4218053",
+      "modified": 1668345205658,
+      "created": 1668345205658,
+      "fileName": "My Collection",
+      "contents": "",
+      "contentType": "yaml",
+      "_type": "api_spec"
+    }
+  ]
+}
