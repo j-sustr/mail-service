@@ -38,8 +38,7 @@ Insomnia workspace
 }
 ```
 
-
-2. Create SMTP connection by sending POST request to `localhost:8080/mail` with multipart payload like this
+2. Create SMTP connection by sending POST request to `localhost:8080/mail` with multipart form payload like this
 
 ```
 connectionId = 3
@@ -48,4 +47,13 @@ to = examplerecipient@gmail.com
 subject = Greeting
 text = ...
 attachment = <file>
+```
+
+## Schedule an email send
+
+Do the same steps as [Sending-email](##Sending-email) and additionally provide "sendTime" field to the multipart form payload
+
+```
+...
+sendTime = 2022-12-18T08:30:00.000Z
 ```
