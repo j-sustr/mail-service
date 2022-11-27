@@ -7,6 +7,8 @@ import * as ErrorResponse from "../../error/ErrorResponse";
 import { ConnectionEntity, ConnectionOptions, ConnectionType } from "../../models/connection";
 import { Repository } from "typeorm";
 import { Logger } from "../../services/Logger";
+import { SendMailService } from "../../services/SendMailService";
+import { GetMailService } from "../../services/GetMailService";
 
 const dtoInSchema = Joi.object({
   type: Joi.string().valid(ConnectionType.IMAP, ConnectionType.SMTP).required(),
@@ -18,7 +20,12 @@ const dtoInSchema = Joi.object({
 });
 
 export default class CreateConnection {
-  constructor(private _repo: Repository<ConnectionEntity>, private _logger: Logger) {}
+  constructor(
+    private _sendMailService: SendMailService,
+    private _getMailService: GetMailService,
+    private _repo: Repository<ConnectionEntity>,
+    private _logger: Logger
+  ) {}
 
   getHandlers(): Array<RequestHandler> {
     return [dtoInValidator(dtoInSchema), this._handleCreateConnection.bind(this)];
@@ -43,9 +50,9 @@ export default class CreateConnection {
 
   private async _testConnection(options: ConnectionOptions) {
     if (options.type === ConnectionType.SMTP) {
-      return await getSendMailService().testConnection(options);
+      return await this._sendMailService.testConnection(options);
     } else if (options.type === ConnectionType.IMAP) {
-      return await getGetMailService().testConnection(options);
+      return await this._getMailService.testConnection(options);
     }
     return false;
   }
