@@ -1,17 +1,20 @@
-import { getLogger } from "nodemailer/lib/shared";
-import { Repository } from "typeorm";
 import CreateConnection from "../../../src/controller/connection/CreateConnection";
-import { ConsoleLogger } from "../../../src/services/Logger";
-import { getAppDataSource, getConnectionRepository } from "../../testServiceProvider";
+import { getAppDataSource, getConnectionRepository, getLogger } from "../../testServiceProvider";
 
 const dataSource = getAppDataSource();
 const repo = getConnectionRepository();
-const createConnection = new CreateConnection(repo, getLogger());
+const createConnectionUseCase = new CreateConnection(repo, getLogger());
 
 describe("CreateConnection", () => {
-  beforeEach(() => {
-    dataSource.dropDatabase();
+  beforeEach(async () => {
+    try {
+      await dataSource.dropDatabase();
+    } catch (error) {
+      console.error("dropDatabase failed", error);
+    }
   });
 
-  test("create - success", () => {});
+  test("create - success", () => {
+    createConnectionUseCase.getHandlers();
+  });
 });
