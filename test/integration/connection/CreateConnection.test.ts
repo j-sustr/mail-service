@@ -6,6 +6,7 @@ import EventEmitter from "events";
 import { It, Mock } from "moq.ts";
 import { GetMailService } from "../../../src/services/GetMailService";
 import { SendMailService } from "../../../src/services/SendMailService";
+import { createMocksAsync } from "../../mockHttpUtils";
 
 const dataSource = getAppDataSource();
 const repo = getConnectionRepository();
@@ -38,8 +39,8 @@ describe("CreateConnection - use case", () => {
     }
   });
 
-  test("create SMTP connection - success", (done) => {
-    const req = createRequest({
+  test("create SMTP connection - success", async () => {
+    const { req, res, result } = createMocksAsync({
       method: "POST",
       url: "/",
       body: {
@@ -51,25 +52,29 @@ describe("CreateConnection - use case", () => {
         password: "123",
       },
     });
-    const res = createResponse({
-      eventEmitter: EventEmitter,
-    });
+    // const res = createResponse({
+    //   eventEmitter: EventEmitter,
+    // });
 
     const router = Router();
     router.post("/", ...createConnectionUseCase.getHandlers());
 
-    req.on("error", (err) => {
-      console.warn("err", err);
-      done();
-    });
+    // req.on("error", (err) => {
+    //   console.warn("err", err);
+    //   done();
+    // });
 
-    req.on("end", () => {
-      expect(res._getData()).toEqual({});
-      done();
-    });
+    // req.on("end", () => {
+    //   expect(res._getData()).toEqual({});
+    //   done();
+    // });
 
     router(req, res, (args) => {
       console.log("calling next", args);
     });
+
+    await result;
+
+    console.log("response", res);
   });
 });
